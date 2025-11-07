@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700;800;900&display=swap');
+
+@theme {
+  --color-pink-light: #FFB6C1;
+  --color-pink-hot: #FF69B4;
+  --color-pink-baby: #FFD1DC;
+  --color-silver: #C0C0C0;
+  --color-silver-light: #E8E8E8;
+  
+  --font-family-sans: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-family-heading: 'Nunito', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FAFAFA;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Apply Nunito to all headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+}
+
+/* React Day Picker overrides */
+.rdp {
+  --rdp-accent-color: #FF69B4;
+  --rdp-background-color: #FFD1DC;
+}
+
+.rdp-day_button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: #FFD1DC;
+}
+
+.rdp-day_button.rdp-day_selected {
+  background-color: #FF69B4;
+  color: white;
+}
+
+.rdp-day_button.rdp-day_selected:hover {
+  background-color: #FFB6C1;
+}
