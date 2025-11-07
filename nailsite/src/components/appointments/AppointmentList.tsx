@@ -4,6 +4,7 @@ import { isSameDay } from 'date-fns';
 import { AppointmentCard } from './AppointmentCard';
 import { getUpcomingWeekAppointments } from '../../utils/dateHelpers';
 import { useStore } from '../../store/useStore';
+import { useAppointmentSync } from '../../hooks/useAppointmentSync';
 import type { Appointment } from '../../types/appointment';
 
 interface AppointmentListProps {
@@ -13,8 +14,8 @@ interface AppointmentListProps {
 export const AppointmentList: React.FC<AppointmentListProps> = ({ onEditAppointment }) => {
   const [showAll, setShowAll] = useState(false);
   const appointments = useStore((state) => state.appointments);
-  const deleteAppointment = useStore((state) => state.deleteAppointment);
   const selectedDate = useStore((state) => state.selectedDate);
+  const { deleteAppointment } = useAppointmentSync();
   
   const upcomingAppointments = getUpcomingWeekAppointments(appointments);
   const upcomingIds = new Set(upcomingAppointments.map(apt => apt.id));

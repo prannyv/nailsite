@@ -9,6 +9,7 @@ export interface Appointment {
   inspirationText: string;
   estimatedPrice: number;
   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+  googleCalendarEventId?: string;  // Google Calendar event ID for sync
   createdAt: Date;
   updatedAt: Date;
 }

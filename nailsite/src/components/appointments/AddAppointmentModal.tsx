@@ -5,7 +5,7 @@ import { Button } from '../shared/Button';
 import { DatePicker } from '../ui/date-picker';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { useStore } from '../../store/useStore';
+import { useAppointmentSync } from '../../hooks/useAppointmentSync';
 import { calculateAppointmentPrice, createAddOn } from '../../utils/priceCalculator';
 import { SERVICE_TYPES, NAIL_LENGTHS, ADD_ON_TYPES } from '../../utils/constants';
 import type { Appointment, AddOn } from '../../types/appointment';
@@ -23,8 +23,7 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
   editingAppointment,
   preSelectedDate,
 }) => {
-  const addAppointment = useStore((state) => state.addAppointment);
-  const updateAppointment = useStore((state) => state.updateAppointment);
+  const { addAppointment, updateAppointment } = useAppointmentSync();
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState('12:00');
@@ -143,7 +142,7 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
     });
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedDate) return;
@@ -172,7 +171,7 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
     };
     
     if (editingAppointment) {
-      updateAppointment(editingAppointment.id, {
+      await updateAppointment(editingAppointment.id, {
         ...appointmentData,
         updatedAt: new Date(),
       });
@@ -183,7 +182,7 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      addAppointment(newAppointment);
+      await addAppointment(newAppointment);
     }
     
     handleClose();

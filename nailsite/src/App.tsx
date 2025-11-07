@@ -5,6 +5,7 @@ import { PressOnList } from './components/pressons/PressOnList';
 import { AddAppointmentModal } from './components/appointments/AddAppointmentModal';
 import { AddPressOnModal } from './components/pressons/AddPressOnModal';
 import { AddNewMenu } from './components/shared/AddNewMenu';
+import { GoogleCalendarConnect } from './components/shared/GoogleCalendarConnect';
 import { useStore } from './store/useStore';
 import type { Appointment } from './types/appointment';
 import type { PressOn } from './types/presson';
@@ -63,9 +64,12 @@ function App() {
               <h1 className="text-3xl font-bold text-white">PolishedByLauren</h1>
               <p className="text-pink-baby text-lg font-bold mt-1">Nail Appointment Calendar</p>
             </div>
-            <div className="text-right">
-              <p className="text-pink-baby text-lg font-bold">Total Revenue</p>
-              <p className="text-3xl font-bold text-white">${totalRevenue.toLocaleString()}</p>
+            <div className="flex flex-col items-end gap-3">
+              <GoogleCalendarConnect />
+              <div className="text-right">
+                <p className="text-pink-baby text-lg font-bold">Total Revenue</p>
+                <p className="text-3xl font-bold text-white">${totalRevenue.toLocaleString()}</p>
+              </div>
             </div>
           </div>
         </div>
