@@ -58,11 +58,6 @@ function App() {
     setIsAvailabilityModalOpen(true);
   };
   
-  const handleEditAvailability = (availability: Availability) => {
-    setEditingAvailability(availability);
-    setIsAvailabilityModalOpen(true);
-  };
-  
   const handleAvailabilityClick = (availability: Availability) => {
     // Convert availability to appointment modal pre-fill
     setSelectedDate(new Date(availability.date));

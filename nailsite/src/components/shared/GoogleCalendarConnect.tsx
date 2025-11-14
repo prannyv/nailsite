@@ -53,8 +53,8 @@ export const GoogleCalendarConnect = () => {
     } else if (code) {
       // We have a code but no tokens - the callback API route might not be working
       console.warn('⚠️ Received OAuth code but callback API route may not be processing it.');
-      console.warn('This usually means API routes are not running. Use "vercel dev" instead of "npm run dev"');
-      alert('OAuth code received but callback failed. Make sure you\'re using "vercel dev" to run API routes locally.');
+      console.warn('This usually means the API route is not deployed or environment variables are missing.');
+      alert('OAuth code received but callback failed. Check that your API routes are deployed and environment variables are set correctly.');
     } else if (error) {
       console.error('OAuth error from Google:', error);
       alert(`OAuth error: ${error}. Please check your Google Console settings.`);
