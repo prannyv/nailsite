@@ -99,7 +99,7 @@ export const CalendarDay: React.FC<CalendarDayProps> = ({
                     {apt.clientName || 'No name'}
                   </p>
                   <p className="text-xs font-semibold text-pink-hot mt-1">
-                    ${apt.estimatedPrice}
+                    ${apt.price}
                   </p>
                 </div>
               ))}

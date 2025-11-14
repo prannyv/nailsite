@@ -29,7 +29,7 @@ function App() {
   // Calculate total revenue (exclude cancelled appointments)
   const totalRevenue = appointments
     .filter(apt => apt.status !== 'CANCELLED')
-    .reduce((sum, apt) => sum + apt.estimatedPrice, 0);
+    .reduce((sum, apt) => sum + apt.price, 0);
   
   const handleAddAppointment = () => {
     setEditingAppointment(null);

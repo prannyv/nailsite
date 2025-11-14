@@ -6,10 +6,9 @@ import { DatePicker } from '../ui/date-picker';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useAppointmentSync } from '../../hooks/useAppointmentSync';
-import { calculateAppointmentPrice, createAddOn } from '../../utils/priceCalculator';
-import { SERVICE_TYPES, NAIL_LENGTHS, ADD_ON_TYPES } from '../../utils/constants';
+import { SERVICE_TYPES, NAIL_LENGTHS } from '../../utils/constants';
 import { useStore } from '../../store/useStore';
-import type { Appointment, AddOn } from '../../types/appointment';
+import type { Appointment } from '../../types/appointment';
 
 interface AddAppointmentModalProps {
   isOpen: boolean;
@@ -38,9 +37,9 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
     serviceType: 'GEL_X' as Appointment['serviceType'],
     nailLength: 'SHORT_MEDIUM' as Appointment['nailLength'],
     inspirationText: '',
+    price: 60,
   });
   
-  const [selectedAddOns, setSelectedAddOns] = useState<Map<string, number>>(new Map());
   const [inspirationPhotos, setInspirationPhotos] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   
@@ -55,35 +54,21 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
         serviceType: editingAppointment.serviceType,
         nailLength: editingAppointment.nailLength,
         inspirationText: editingAppointment.inspirationText,
+        price: editingAppointment.price,
       });
       
-      const addOnsMap = new Map<string, number>();
-      editingAppointment.addOns.forEach(addOn => {
-        addOnsMap.set(addOn.type, addOn.quantity);
-      });
-      setSelectedAddOns(addOnsMap);
       setInspirationPhotos(editingAppointment.inspirationPhotos);
     } else if (preSelectedDate) {
       setSelectedDate(preSelectedDate);
       setSelectedTime(preSelectedTime || '12:00');
+      setFormData(prev => ({ ...prev, price: 60 })); // Reset price to default
     } else {
       // Default to today
       setSelectedDate(new Date());
       setSelectedTime('12:00');
+      setFormData(prev => ({ ...prev, price: 60 })); // Reset price to default
     }
   }, [editingAppointment, preSelectedDate, preSelectedTime, isOpen]);
-  
-  const handleAddOnToggle = (type: AddOn['type'], quantity: number) => {
-    setSelectedAddOns(prev => {
-      const newMap = new Map(prev);
-      if (quantity === 0) {
-        newMap.delete(type);
-      } else {
-        newMap.set(type, quantity);
-      }
-      return newMap;
-    });
-  };
   
   const processFiles = (files: FileList | File[]) => {
     Array.from(files).forEach(file => {
@@ -136,18 +121,6 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
     setInspirationPhotos(prev => prev.filter((_, i) => i !== index));
   };
   
-  const calculateEstimatedPrice = (): number => {
-    const addOns: AddOn[] = Array.from(selectedAddOns.entries()).map(([type, quantity]) =>
-      createAddOn(type as AddOn['type'], quantity)
-    );
-    
-    return calculateAppointmentPrice({
-      serviceType: formData.serviceType,
-      nailLength: formData.nailLength,
-      addOns,
-    });
-  };
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -158,21 +131,14 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
     const appointmentDate = new Date(selectedDate);
     appointmentDate.setHours(parseInt(hours), parseInt(minutes));
     
-    const addOns: AddOn[] = Array.from(selectedAddOns.entries()).map(([type, quantity]) =>
-      createAddOn(type as AddOn['type'], quantity)
-    );
-    
-    const estimatedPrice = calculateEstimatedPrice();
-    
     const appointmentData = {
       date: appointmentDate,
       clientName: formData.clientName || undefined,
       serviceType: formData.serviceType,
       nailLength: formData.nailLength,
-      addOns,
       inspirationPhotos,
       inspirationText: formData.inspirationText,
-      estimatedPrice,
+      price: formData.price,
       status: 'SCHEDULED' as const,
     };
     
@@ -207,8 +173,8 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
       serviceType: 'GEL_X',
       nailLength: 'SHORT_MEDIUM',
       inspirationText: '',
+      price: 60,
     });
-    setSelectedAddOns(new Map());
     setInspirationPhotos([]);
     onClose();
   };
@@ -308,58 +274,6 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
           </div>
         )}
         
-        {/* Add-ons */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Add-ons (Optional)
-          </label>
-          <div className="space-y-3">
-            {ADD_ON_TYPES.map((addOn) => {
-              const quantity = selectedAddOns.get(addOn.value) || 0;
-              const isSelected = quantity > 0;
-              
-              return (
-                <button
-                  key={addOn.value}
-                  type="button"
-                  onClick={() => handleAddOnToggle(addOn.value as AddOn['type'], isSelected ? 0 : 10)}
-                  className={`
-                    w-full flex items-center justify-between p-4 rounded-lg font-medium transition-colors text-left
-                    ${isSelected
-                      ? 'bg-pink-hot text-white'
-                      : 'bg-silver-light text-gray-700 hover:bg-silver'
-                    }
-                  `}
-                >
-                  <span>{addOn.label}</span>
-                  {isSelected && (
-                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        onClick={() => handleAddOnToggle(addOn.value as AddOn['type'], Math.max(1, quantity - 1))}
-                        className="w-8 h-8 flex items-center justify-center border border-white/20 bg-white/10 text-white rounded hover:bg-white/20 transition-colors text-lg font-bold"
-                      >
-                        −
-                      </button>
-                      <span className="w-12 text-center text-white font-medium">
-                        {quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleAddOnToggle(addOn.value as AddOn['type'], Math.min(10, quantity + 1))}
-                        className="w-8 h-8 flex items-center justify-center border border-white/20 bg-white/10 text-white rounded hover:bg-white/20 transition-colors text-lg font-bold"
-                      >
-                        +
-                      </button>
-                      <span className="text-sm text-white/90">nails</span>
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        
         {/* Inspiration Photos */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -432,11 +346,20 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
           />
         </div>
         
-        {/* Estimated Price */}
+        {/* Price Editor */}
         <div className="bg-pink-baby p-4 rounded-lg">
           <div className="flex items-center justify-between">
-            <span className="text-lg font-semibold text-gray-800">Estimated Price:</span>
-            <span className="text-2xl font-bold text-pink-hot">${calculateEstimatedPrice()}</span>
+            <span className="text-lg font-semibold text-gray-800">Price:</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+              required
+              className="bg-transparent border-none outline-none text-2xl font-bold text-pink-hot text-right w-32 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              placeholder="60.00"
+            />
           </div>
         </div>
         

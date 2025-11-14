@@ -353,7 +353,7 @@ export const GoogleCalendarService = {
     const extendedProperties: Record<string, string> = {
       serviceType: appointment.serviceType,
       nailLength: appointment.nailLength,
-      estimatedPrice: appointment.estimatedPrice.toString(),
+      price: appointment.price.toString(),
       status: appointment.status,
       inspirationText: appointment.inspirationText || '',
     };
@@ -363,15 +363,10 @@ export const GoogleCalendarService = {
       extendedProperties.imageFileIds = imageFileIds.join(',');
       extendedProperties.driveFolderId = appointmentFolderId!;
     }
-
-    // Add add-ons data if any
-    if (appointment.addOns && appointment.addOns.length > 0) {
-      extendedProperties.addOns = JSON.stringify(appointment.addOns);
-    }
     
     const event = {
       summary: `${appointment.clientName || 'Nail Appointment'} - ${appointment.serviceType.replace(/_/g, ' ')}`,
-      description: `Service: ${appointment.serviceType.replace(/_/g, ' ')}\nNail Length: ${appointment.nailLength.replace(/_/g, ' ')}\nPrice: $${appointment.estimatedPrice}\n\nInspiration: ${appointment.inspirationText || 'None'}`,
+      description: `Service: ${appointment.serviceType.replace(/_/g, ' ')}\nNail Length: ${appointment.nailLength.replace(/_/g, ' ')}\nPrice: $${appointment.price}\n\nInspiration: ${appointment.inspirationText || 'None'}`,
       start: {
         dateTime: new Date(appointment.date).toISOString(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -442,7 +437,7 @@ export const GoogleCalendarService = {
     const extendedProperties: Record<string, string> = {
       serviceType: appointment.serviceType,
       nailLength: appointment.nailLength,
-      estimatedPrice: appointment.estimatedPrice.toString(),
+      price: appointment.price.toString(),
       status: appointment.status,
       inspirationText: appointment.inspirationText || '',
     };
@@ -451,14 +446,10 @@ export const GoogleCalendarService = {
       extendedProperties.imageFileIds = imageFileIds.join(',');
       extendedProperties.driveFolderId = appointmentFolderId!;
     }
-
-    if (appointment.addOns && appointment.addOns.length > 0) {
-      extendedProperties.addOns = JSON.stringify(appointment.addOns);
-    }
     
     const event = {
       summary: `${appointment.clientName || 'Nail Appointment'} - ${appointment.serviceType.replace(/_/g, ' ')}`,
-      description: `Service: ${appointment.serviceType.replace(/_/g, ' ')}\nNail Length: ${appointment.nailLength.replace(/_/g, ' ')}\nPrice: $${appointment.estimatedPrice}\n\nInspiration: ${appointment.inspirationText || 'None'}`,
+      description: `Service: ${appointment.serviceType.replace(/_/g, ' ')}\nNail Length: ${appointment.nailLength.replace(/_/g, ' ')}\nPrice: $${appointment.price}\n\nInspiration: ${appointment.inspirationText || 'None'}`,
       start: {
         dateTime: new Date(appointment.date).toISOString(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -592,20 +583,12 @@ export const GoogleCalendarService = {
     // Use extended properties if available, otherwise use defaults
     const nailLength: 'SHORT_MEDIUM' | 'LONG_XLONG' = 
       (props.nailLength as any) || 'SHORT_MEDIUM';
-    const estimatedPrice = props.estimatedPrice ? parseFloat(props.estimatedPrice) : 50;
+    // Try both 'price' and 'estimatedPrice' for backward compatibility
+    const price = props.price ? parseFloat(props.price) : 
+                  (props.estimatedPrice ? parseFloat(props.estimatedPrice) : 60);
     const status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' = 
       (props.status as any) || 'SCHEDULED';
     const inspirationText = props.inspirationText || '';
-
-    // Parse add-ons if available
-    let addOns = [];
-    if (props.addOns) {
-      try {
-        addOns = JSON.parse(props.addOns);
-      } catch (e) {
-        console.error('Error parsing add-ons:', e);
-      }
-    }
 
     // Download images from Drive if available
     let inspirationPhotos: string[] = [];
@@ -631,10 +614,9 @@ export const GoogleCalendarService = {
       clientName,
       serviceType,
       nailLength,
-      addOns,
       inspirationPhotos,
       inspirationText,
-      estimatedPrice,
+      price,
       status,
       googleCalendarEventId: event.id,
       createdAt: date, // Approximate

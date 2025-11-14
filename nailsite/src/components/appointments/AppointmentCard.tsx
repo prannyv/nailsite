@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateHelpers';
 import { ConfirmDialog } from '../shared/ConfirmDialog';
 import type { Appointment } from '../../types/appointment';
-import { SERVICE_TYPES, ADD_ON_TYPES } from '../../utils/constants';
+import { SERVICE_TYPES } from '../../utils/constants';
 
 interface AppointmentCardProps {
   appointment: Appointment;
@@ -47,7 +47,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
               <p className="text-sm text-gray-600">{appointment.clientName}</p>
             )}
             <p className="text-lg font-semibold text-pink-hot mt-1">
-              ${appointment.estimatedPrice}
+              ${appointment.price}
             </p>
           </div>
           <button className="text-gray-400 hover:text-pink-hot transition-colors">
@@ -67,24 +67,6 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
                 <span className="text-sm text-gray-800">
                   {appointment.nailLength.replace('_', '/')}
                 </span>
-              </div>
-            )}
-            
-            {/* Add-ons */}
-            {appointment.addOns.length > 0 && (
-              <div>
-                <span className="text-sm font-medium text-gray-600 block mb-2">Add-ons:</span>
-                <div className="space-y-1">
-                  {appointment.addOns.map((addOn, index) => {
-                    const addOnLabel = ADD_ON_TYPES.find(a => a.value === addOn.type)?.label;
-                    return (
-                      <div key={index} className="text-sm text-gray-800 flex justify-between">
-                        <span>{addOnLabel} (x{addOn.quantity})</span>
-                        <span className="font-medium">${addOn.totalPrice}</span>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
             )}
             
