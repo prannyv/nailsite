@@ -7,13 +7,6 @@ interface GoogleTokens {
   expiry_date?: number;
 }
 
-interface DriveFile {
-  id: string;
-  name: string;
-  webViewLink?: string;
-  webContentLink?: string;
-}
-
 interface CalendarEvent {
   id: string;
   summary: string;
