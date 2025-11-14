@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Calendar, Package } from 'lucide-react';
+import { Plus, Calendar, Package, Clock } from 'lucide-react';
 
 interface AddNewMenuProps {
   onAddAppointment: () => void;
   onAddPressOn: () => void;
+  onAddAvailability: () => void;
 }
 
 export const AddNewMenu: React.FC<AddNewMenuProps> = ({
   onAddAppointment,
   onAddPressOn,
+  onAddAvailability,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,11 @@ export const AddNewMenu: React.FC<AddNewMenuProps> = ({
     setIsOpen(false);
   };
   
+  const handleAddAvailability = () => {
+    onAddAvailability();
+    setIsOpen(false);
+  };
+  
   return (
     <div ref={menuRef} className="fixed bottom-6 right-6 z-50">
       {/* Menu Options */}
@@ -57,6 +64,13 @@ export const AddNewMenu: React.FC<AddNewMenuProps> = ({
           >
             <Package className="text-pink-hot" size={20} />
             <span className="font-medium text-gray-800">New Press-On</span>
+          </button>
+          <button
+            onClick={handleAddAvailability}
+            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-blue-50 transition-colors text-left"
+          >
+            <Clock className="text-blue-500" size={20} />
+            <span className="font-medium text-gray-800">New Availability</span>
           </button>
         </div>
       )}

@@ -39,3 +39,13 @@ export const PRESS_ON_STATUSES = [
   { value: 'SOLD', label: 'Sold' },
 ] as const;
 
+// Google Calendar sync configuration
+export const CALENDAR_SYNC_CONFIG = {
+  // Number of months to look back when syncing from Google Calendar
+  MONTHS_BEFORE: 3,
+  // Number of months to look forward when syncing from Google Calendar
+  MONTHS_AFTER: 3,
+  // Main folder name in Google Drive for all appointment data
+  DRIVE_FOLDER_NAME: 'Nailsite Appointments',
+};
+

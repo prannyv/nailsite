@@ -13,10 +13,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   try {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VITE_APP_URL || 'http://localhost:5173';
+    const clientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    
+    if (!clientId || !clientSecret) {
+      console.error('Missing OAuth credentials');
+      return res.status(401).json({ error: 'Missing OAuth credentials' });
+    }
+    
     const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`
+      clientId,
+      clientSecret,
+      `${appUrl}/api/auth/callback`
     );
     
     oauth2Client.setCredentials({

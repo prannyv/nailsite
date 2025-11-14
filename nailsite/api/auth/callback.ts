@@ -9,10 +9,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   try {
+    // Get the app URL from environment variables
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VITE_APP_URL || 'http://localhost:5173';
+    const clientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    
+    if (!clientId || !clientSecret) {
+      console.error('Missing OAuth credentials');
+      return res.redirect('/?google_auth=error');
+    }
+    
     const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`
+      clientId,
+      clientSecret,
+      `${appUrl}/api/auth/callback`
     );
     
     // Exchange code for tokens

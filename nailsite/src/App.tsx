@@ -4,19 +4,26 @@ import { AppointmentList } from './components/appointments/AppointmentList';
 import { PressOnList } from './components/pressons/PressOnList';
 import { AddAppointmentModal } from './components/appointments/AddAppointmentModal';
 import { AddPressOnModal } from './components/pressons/AddPressOnModal';
+import { AddAvailabilityModal } from './components/availabilities/AddAvailabilityModal';
 import { AddNewMenu } from './components/shared/AddNewMenu';
 import { GoogleCalendarConnect } from './components/shared/GoogleCalendarConnect';
 import { useStore } from './store/useStore';
 import type { Appointment } from './types/appointment';
 import type { PressOn } from './types/presson';
+import type { Availability } from './types/availability';
 
 function App() {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isPressOnModalOpen, setIsPressOnModalOpen] = useState(false);
+  const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [editingPressOn, setEditingPressOn] = useState<PressOn | null>(null);
+  const [editingAvailability, setEditingAvailability] = useState<Availability | null>(null);
+  const [preSelectedTime, setPreSelectedTime] = useState<string | null>(null);
+  const [availabilityToRemove, setAvailabilityToRemove] = useState<string | null>(null); // Store availability ID to remove on appointment creation
   
   const selectedDate = useStore((state) => state.selectedDate);
+  const setSelectedDate = useStore((state) => state.setSelectedDate);
   const appointments = useStore((state) => state.appointments);
   
   // Calculate total revenue (exclude cancelled appointments)
@@ -26,6 +33,8 @@ function App() {
   
   const handleAddAppointment = () => {
     setEditingAppointment(null);
+    setPreSelectedTime(null);
+    setAvailabilityToRemove(null);
     setIsAppointmentModalOpen(true);
   };
   
@@ -44,14 +53,40 @@ function App() {
     setIsPressOnModalOpen(true);
   };
   
+  const handleAddAvailability = () => {
+    setEditingAvailability(null);
+    setIsAvailabilityModalOpen(true);
+  };
+  
+  const handleEditAvailability = (availability: Availability) => {
+    setEditingAvailability(availability);
+    setIsAvailabilityModalOpen(true);
+  };
+  
+  const handleAvailabilityClick = (availability: Availability) => {
+    // Convert availability to appointment modal pre-fill
+    setSelectedDate(new Date(availability.date));
+    setEditingAppointment(null);
+    setPreSelectedTime(availability.startTime);
+    setAvailabilityToRemove(availability.id); // Track which availability to remove on successful appointment creation
+    setIsAppointmentModalOpen(true);
+  };
+  
   const handleCloseAppointmentModal = () => {
     setIsAppointmentModalOpen(false);
     setEditingAppointment(null);
+    setPreSelectedTime(null);
+    setAvailabilityToRemove(null); // Clear the availability to remove since modal was closed
   };
   
   const handleClosePressOnModal = () => {
     setIsPressOnModalOpen(false);
     setEditingPressOn(null);
+  };
+  
+  const handleCloseAvailabilityModal = () => {
+    setIsAvailabilityModalOpen(false);
+    setEditingAvailability(null);
   };
   
   return (
@@ -91,7 +126,7 @@ function App() {
           
           {/* Right Main Area - Calendar */}
           <div className="lg:col-span-8">
-            <Calendar />
+            <Calendar onAvailabilityClick={handleAvailabilityClick} />
           </div>
         </div>
       </main>
@@ -100,6 +135,7 @@ function App() {
       <AddNewMenu
         onAddAppointment={handleAddAppointment}
         onAddPressOn={handleAddPressOn}
+        onAddAvailability={handleAddAvailability}
       />
       
       {/* Modals */}
@@ -108,12 +144,21 @@ function App() {
         onClose={handleCloseAppointmentModal}
         editingAppointment={editingAppointment}
         preSelectedDate={selectedDate}
+        preSelectedTime={preSelectedTime}
+        availabilityIdToRemove={availabilityToRemove}
       />
       
       <AddPressOnModal
         isOpen={isPressOnModalOpen}
         onClose={handleClosePressOnModal}
         editingPressOn={editingPressOn}
+      />
+      
+      <AddAvailabilityModal
+        isOpen={isAvailabilityModalOpen}
+        onClose={handleCloseAvailabilityModal}
+        editingAvailability={editingAvailability}
+        preSelectedDate={selectedDate}
       />
     </div>
   );

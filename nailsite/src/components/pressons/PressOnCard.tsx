@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Edit, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ConfirmDialog } from '../shared/ConfirmDialog';
 import type { PressOn } from '../../types/presson';
 
 interface PressOnCardProps {
@@ -14,6 +15,7 @@ export const PressOnCard: React.FC<PressOnCardProps> = ({
   onDelete,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const statusColors = {
     AVAILABLE: 'bg-green-100 text-green-700',
@@ -89,7 +91,7 @@ export const PressOnCard: React.FC<PressOnCardProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete(pressOn.id);
+                setShowDeleteConfirm(true);
               }}
               className="flex items-center gap-1 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-full text-sm font-medium transition-colors"
             >
@@ -99,6 +101,15 @@ export const PressOnCard: React.FC<PressOnCardProps> = ({
           </div>
         </div>
       )}
+      
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => onDelete(pressOn.id)}
+        title="Delete Press-On?"
+        message={`Are you sure you want to delete "${pressOn.name}"? This action cannot be undone.`}
+      />
     </div>
   );
 };

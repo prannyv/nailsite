@@ -8,6 +8,7 @@ import { Label } from '../ui/label';
 import { useAppointmentSync } from '../../hooks/useAppointmentSync';
 import { calculateAppointmentPrice, createAddOn } from '../../utils/priceCalculator';
 import { SERVICE_TYPES, NAIL_LENGTHS, ADD_ON_TYPES } from '../../utils/constants';
+import { useStore } from '../../store/useStore';
 import type { Appointment, AddOn } from '../../types/appointment';
 
 interface AddAppointmentModalProps {
@@ -15,6 +16,8 @@ interface AddAppointmentModalProps {
   onClose: () => void;
   editingAppointment?: Appointment | null;
   preSelectedDate?: Date | null;
+  preSelectedTime?: string | null;
+  availabilityIdToRemove?: string | null;
 }
 
 export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
@@ -22,8 +25,11 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
   onClose,
   editingAppointment,
   preSelectedDate,
+  preSelectedTime,
+  availabilityIdToRemove,
 }) => {
   const { addAppointment, updateAppointment } = useAppointmentSync();
+  const deleteAvailability = useStore((state) => state.deleteAvailability);
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState('12:00');
@@ -59,13 +65,13 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
       setInspirationPhotos(editingAppointment.inspirationPhotos);
     } else if (preSelectedDate) {
       setSelectedDate(preSelectedDate);
-      setSelectedTime('12:00');
+      setSelectedTime(preSelectedTime || '12:00');
     } else {
       // Default to today
       setSelectedDate(new Date());
       setSelectedTime('12:00');
     }
-  }, [editingAppointment, preSelectedDate, isOpen]);
+  }, [editingAppointment, preSelectedDate, preSelectedTime, isOpen]);
   
   const handleAddOnToggle = (type: AddOn['type'], quantity: number) => {
     setSelectedAddOns(prev => {
@@ -183,6 +189,11 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
         updatedAt: new Date(),
       };
       await addAppointment(newAppointment);
+      
+      // If this appointment was created from an availability, remove that availability
+      if (availabilityIdToRemove) {
+        deleteAvailability(availabilityIdToRemove);
+      }
     }
     
     handleClose();
@@ -323,14 +334,23 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
                   <span>{addOn.label}</span>
                   {isSelected && (
                     <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={quantity}
-                        onChange={(e) => handleAddOnToggle(addOn.value as AddOn['type'], parseInt(e.target.value) || 10)}
-                        className="w-16 px-2 py-1 border border-white/20 bg-white/10 text-white rounded text-center focus:outline-none focus:ring-2 focus:ring-white/30"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddOnToggle(addOn.value as AddOn['type'], Math.max(1, quantity - 1))}
+                        className="w-8 h-8 flex items-center justify-center border border-white/20 bg-white/10 text-white rounded hover:bg-white/20 transition-colors text-lg font-bold"
+                      >
+                        −
+                      </button>
+                      <span className="w-12 text-center text-white font-medium">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleAddOnToggle(addOn.value as AddOn['type'], Math.min(10, quantity + 1))}
+                        className="w-8 h-8 flex items-center justify-center border border-white/20 bg-white/10 text-white rounded hover:bg-white/20 transition-colors text-lg font-bold"
+                      >
+                        +
+                      </button>
                       <span className="text-sm text-white/90">nails</span>
                     </div>
                   )}

@@ -4,12 +4,18 @@ import { CalendarHeader } from './CalendarHeader';
 import { CalendarDay } from './CalendarDay';
 import { getDaysInMonth } from '../../utils/dateHelpers';
 import { useStore } from '../../store/useStore';
+import type { Availability } from '../../types/availability';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export const Calendar: React.FC = () => {
+interface CalendarProps {
+  onAvailabilityClick?: (availability: Availability) => void;
+}
+
+export const Calendar: React.FC<CalendarProps> = ({ onAvailabilityClick }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const appointments = useStore((state) => state.appointments);
+  const availabilities = useStore((state) => state.availabilities);
   const selectedDate = useStore((state) => state.selectedDate);
   const setSelectedDate = useStore((state) => state.setSelectedDate);
   
@@ -25,6 +31,12 @@ export const Calendar: React.FC = () => {
   
   const handleDayClick = (date: Date) => {
     setSelectedDate(date);
+  };
+  
+  const handleAvailabilityClick = (availability: Availability) => {
+    if (onAvailabilityClick) {
+      onAvailabilityClick(availability);
+    }
   };
   
   return (
@@ -55,7 +67,9 @@ export const Calendar: React.FC = () => {
             date={date}
             currentMonth={currentMonth}
             appointments={appointments}
+            availabilities={availabilities}
             onClick={handleDayClick}
+            onAvailabilityClick={handleAvailabilityClick}
             isSelected={selectedDate ? date.toDateString() === selectedDate.toDateString() : false}
           />
         ))}

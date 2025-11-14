@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateHelpers';
+import { ConfirmDialog } from '../shared/ConfirmDialog';
 import type { Appointment } from '../../types/appointment';
 import { SERVICE_TYPES, ADD_ON_TYPES } from '../../utils/constants';
 
@@ -18,6 +19,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
   forceExpanded = false,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // Use forceExpanded if provided, otherwise use local state
   const expanded = forceExpanded || isExpanded;
@@ -126,7 +128,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete(appointment.id);
+                  setShowDeleteConfirm(true);
                 }}
                 className="flex items-center gap-1 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-full text-sm font-medium transition-colors"
               >
@@ -137,6 +139,15 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
           </div>
         </div>
       )}
+      
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => onDelete(appointment.id)}
+        title="Delete Appointment?"
+        message={`Are you sure you want to delete the appointment${appointment.clientName ? ` for ${appointment.clientName}` : ''}? This action cannot be undone.`}
+      />
     </div>
   );
 };
