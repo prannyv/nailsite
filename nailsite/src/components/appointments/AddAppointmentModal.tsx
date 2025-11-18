@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Check } from 'lucide-react';
 import { Modal } from '../shared/Modal';
 import { Button } from '../shared/Button';
 import { DatePicker } from '../ui/date-picker';
@@ -32,6 +32,8 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState('12:00');
+  const [basePriceInput, setBasePriceInput] = useState<string>('60');
+  const [soakOff, setSoakOff] = useState(false);
   const [formData, setFormData] = useState({
     clientName: '',
     serviceType: 'GEL_X' as Appointment['serviceType'],
@@ -43,12 +45,24 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
   const [inspirationPhotos, setInspirationPhotos] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   
+  // Calculate price based on base price and soak off
+  useEffect(() => {
+    const basePrice = parseFloat(basePriceInput) || 0;
+    const calculatedPrice = basePrice + (soakOff ? 10 : 0);
+    setFormData(prev => ({ ...prev, price: calculatedPrice }));
+  }, [basePriceInput, soakOff]);
+  
   useEffect(() => {
     if (editingAppointment) {
       const aptDate = new Date(editingAppointment.date);
       setSelectedDate(aptDate);
       setSelectedTime(aptDate.toTimeString().slice(0, 5)); // HH:MM format
       
+      const editingSoakOff = editingAppointment.soakOff ?? false;
+      const editingBasePrice = editingAppointment.price - (editingSoakOff ? 10 : 0);
+      
+      setSoakOff(editingSoakOff);
+      setBasePriceInput(editingBasePrice.toString());
       setFormData({
         clientName: editingAppointment.clientName || '',
         serviceType: editingAppointment.serviceType,
@@ -61,12 +75,14 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
     } else if (preSelectedDate) {
       setSelectedDate(preSelectedDate);
       setSelectedTime(preSelectedTime || '12:00');
-      setFormData(prev => ({ ...prev, price: 60 })); // Reset price to default
+      setBasePriceInput('60');
+      setSoakOff(false);
     } else {
       // Default to today
       setSelectedDate(new Date());
       setSelectedTime('12:00');
-      setFormData(prev => ({ ...prev, price: 60 })); // Reset price to default
+      setBasePriceInput('60');
+      setSoakOff(false);
     }
   }, [editingAppointment, preSelectedDate, preSelectedTime, isOpen]);
   
@@ -131,14 +147,19 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
     const appointmentDate = new Date(selectedDate);
     appointmentDate.setHours(parseInt(hours), parseInt(minutes));
     
+    // Calculate final price - if basePriceInput is empty, default to 0
+    const basePrice = parseFloat(basePriceInput) || 0;
+    const finalPrice = basePrice + (soakOff ? 10 : 0);
+    
     const appointmentData = {
       date: appointmentDate,
       clientName: formData.clientName || undefined,
       serviceType: formData.serviceType,
       nailLength: formData.nailLength,
+      soakOff,
       inspirationPhotos,
       inspirationText: formData.inspirationText,
-      price: formData.price,
+      price: finalPrice,
       status: 'SCHEDULED' as const,
     };
     
@@ -168,6 +189,8 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
   const handleClose = () => {
     setSelectedDate(new Date());
     setSelectedTime('12:00');
+    setBasePriceInput('60');
+    setSoakOff(false);
     setFormData({
       clientName: '',
       serviceType: 'GEL_X',
@@ -274,6 +297,34 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
           </div>
         )}
         
+        {/* Soak Off Service */}
+        <div>
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={soakOff}
+                onChange={(e) => setSoakOff(e.target.checked)}
+                className="w-5 h-5 rounded border-2 cursor-pointer appearance-none transition-all focus:outline-none focus:ring-2 focus:ring-pink-hot focus:ring-offset-2"
+                style={{
+                  backgroundColor: soakOff ? '#ec4899' : 'white',
+                  borderColor: soakOff ? '#ec4899' : '#d1d5db',
+                }}
+              />
+              {soakOff && (
+                <Check 
+                  size={16} 
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white pointer-events-none"
+                  strokeWidth={3}
+                />
+              )}
+            </div>
+            <span className="text-sm font-medium text-gray-700">
+              Soak Off (+$10)
+            </span>
+          </label>
+        </div>
+        
         {/* Inspiration Photos */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -354,13 +405,17 @@ export const AddAppointmentModal: React.FC<AddAppointmentModalProps> = ({
               type="number"
               min="0"
               step="0.01"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-              required
+              value={basePriceInput}
+              onChange={(e) => setBasePriceInput(e.target.value)}
               className="bg-transparent border-none outline-none text-2xl font-bold text-pink-hot text-right w-32 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               placeholder="60.00"
             />
           </div>
+          {soakOff && (
+            <div className="mt-2 text-sm text-gray-600">
+              Base: ${(parseFloat(basePriceInput) || 0).toFixed(2)} + Soak Off: $10.00 = <span className="font-semibold">${formData.price.toFixed(2)}</span>
+            </div>
+          )}
         </div>
         
         {/* Action Buttons */}

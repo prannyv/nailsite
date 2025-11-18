@@ -353,6 +353,7 @@ export const GoogleCalendarService = {
     const extendedProperties: Record<string, string> = {
       serviceType: appointment.serviceType,
       nailLength: appointment.nailLength,
+      soakOff: (appointment.soakOff ?? false).toString(),
       price: appointment.price.toString(),
       status: appointment.status,
       inspirationText: appointment.inspirationText || '',
@@ -364,9 +365,10 @@ export const GoogleCalendarService = {
       extendedProperties.driveFolderId = appointmentFolderId!;
     }
     
+    const soakOffText = appointment.soakOff ? '\nSoak Off: Yes' : '';
     const event = {
       summary: `${appointment.clientName || 'Nail Appointment'} - ${appointment.serviceType.replace(/_/g, ' ')}`,
-      description: `Service: ${appointment.serviceType.replace(/_/g, ' ')}\nNail Length: ${appointment.nailLength.replace(/_/g, ' ')}\nPrice: $${appointment.price}\n\nInspiration: ${appointment.inspirationText || 'None'}`,
+      description: `Service: ${appointment.serviceType.replace(/_/g, ' ')}\nNail Length: ${appointment.nailLength.replace(/_/g, ' ')}${soakOffText}\nPrice: $${appointment.price}\n\nInspiration: ${appointment.inspirationText || 'None'}`,
       start: {
         dateTime: new Date(appointment.date).toISOString(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -437,6 +439,7 @@ export const GoogleCalendarService = {
     const extendedProperties: Record<string, string> = {
       serviceType: appointment.serviceType,
       nailLength: appointment.nailLength,
+      soakOff: (appointment.soakOff ?? false).toString(),
       price: appointment.price.toString(),
       status: appointment.status,
       inspirationText: appointment.inspirationText || '',
@@ -447,9 +450,10 @@ export const GoogleCalendarService = {
       extendedProperties.driveFolderId = appointmentFolderId!;
     }
     
+    const soakOffText = appointment.soakOff ? '\nSoak Off: Yes' : '';
     const event = {
       summary: `${appointment.clientName || 'Nail Appointment'} - ${appointment.serviceType.replace(/_/g, ' ')}`,
-      description: `Service: ${appointment.serviceType.replace(/_/g, ' ')}\nNail Length: ${appointment.nailLength.replace(/_/g, ' ')}\nPrice: $${appointment.price}\n\nInspiration: ${appointment.inspirationText || 'None'}`,
+      description: `Service: ${appointment.serviceType.replace(/_/g, ' ')}\nNail Length: ${appointment.nailLength.replace(/_/g, ' ')}${soakOffText}\nPrice: $${appointment.price}\n\nInspiration: ${appointment.inspirationText || 'None'}`,
       start: {
         dateTime: new Date(appointment.date).toISOString(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -583,6 +587,7 @@ export const GoogleCalendarService = {
     // Use extended properties if available, otherwise use defaults
     const nailLength: 'SHORT_MEDIUM' | 'LONG_XLONG' = 
       (props.nailLength as any) || 'SHORT_MEDIUM';
+    const soakOff = props.soakOff === 'true' || props.soakOff === true;
     // Try both 'price' and 'estimatedPrice' for backward compatibility
     const price = props.price ? parseFloat(props.price) : 
                   (props.estimatedPrice ? parseFloat(props.estimatedPrice) : 60);
@@ -614,6 +619,7 @@ export const GoogleCalendarService = {
       clientName,
       serviceType,
       nailLength,
+      soakOff,
       inspirationPhotos,
       inspirationText,
       price,

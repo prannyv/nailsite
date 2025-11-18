@@ -4,6 +4,7 @@ export interface Appointment {
   clientName?: string;
   serviceType: 'GEL_X' | 'GEL_MANICURE' | 'BUILDER_GEL';
   nailLength: 'SHORT_MEDIUM' | 'LONG_XLONG';
+  soakOff: boolean;
   inspirationPhotos: string[];  // URLs or base64
   inspirationText: string;
   price: number;

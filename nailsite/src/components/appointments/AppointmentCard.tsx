@@ -70,6 +70,14 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
               </div>
             )}
             
+            {/* Soak Off */}
+            {appointment.soakOff && (
+              <div>
+                <span className="text-sm font-medium text-gray-600">Soak Off: </span>
+                <span className="text-sm text-gray-800">Yes (+$10)</span>
+              </div>
+            )}
+            
             {/* Inspiration Text */}
             {appointment.inspirationText && (
               <div>
