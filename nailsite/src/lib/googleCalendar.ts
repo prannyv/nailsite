@@ -587,7 +587,7 @@ export const GoogleCalendarService = {
     // Use extended properties if available, otherwise use defaults
     const nailLength: 'SHORT_MEDIUM' | 'LONG_XLONG' = 
       (props.nailLength as any) || 'SHORT_MEDIUM';
-    const soakOff = props.soakOff === 'true' || props.soakOff === true;
+    const soakOff = props.soakOff === 'true';
     // Try both 'price' and 'estimatedPrice' for backward compatibility
     const price = props.price ? parseFloat(props.price) : 
                   (props.estimatedPrice ? parseFloat(props.estimatedPrice) : 60);
